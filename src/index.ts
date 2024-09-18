@@ -7,12 +7,12 @@ import {ethers, Wallet} from 'ethers'
 import {inspect} from 'node:util'
 import {request as requestHttps, RequestOptions} from 'node:https'
 import Phin from 'phin'
-import {Telegraf} from 'telegraf'
 import TelegramBot from "node-telegram-bot-api"
 
+let pageLocked = false
 let wallet: Wallet
 const postPool: taskPoolObj[] = []
-const chatId = ''
+const chatId = '@conettest'			//'-2357293635'
 
 const startGossip = (url: string, POST: string, callback: (err?: string, data?: string) => void) => {
 	const Url = new URL(url)
@@ -107,7 +107,7 @@ const listenAPIServer = async () => {
 					checkAccount: kk.data[0],
 					uuid: kk.uuid,
 					result: {
-						isInGroup: false,
+						isInTGGroup: false,
 						status: 200
 					},
 					walletAddress: kk.walletAddress
@@ -144,12 +144,13 @@ const callbackTwitter = async (obj: taskPoolObj) => {
 
 const searchAccount = async () => {
 	if (!bot) {
-		return
+		return 
 	}
 
 	const task = postPool.shift()
 	if (!task) {
-		return logger(Colors.gray(`postPool has empty!`))
+		logger(Colors.gray(`postPool has empty!`))
+		return
 	}
 	pageLocked = true
 	const telegramAccount = parseInt(task.checkAccount)
@@ -159,28 +160,28 @@ const searchAccount = async () => {
 		task.result.status = 404
 		await callbackTwitter(task)
 		pageLocked = false
-		return searchAccount()
+		searchAccount()
+		return 
 	}
 
 	
 
 	bot.getChatMember(chatId, telegramAccount).then(async () => {
 		logger(Colors.blue(`search Telegram Account ${telegramAccount} is in group!`))
-		task.result.isInGroup = true
+		task.result.isInTGGroup = true
 		await callbackTwitter(task)
 		pageLocked = false
-		return searchAccount()
+		searchAccount()
+		return 
 
 	}).catch(async ex => {
-		task.result.isInGroup = false
+		task.result.isInTGGroup = false
+		logger(Colors.red(`getChatMember has EX ${ex.message}`))
 		await callbackTwitter(task)
 		pageLocked = false
-		return searchAccount()
-		
+		searchAccount()
 	})
 }
-
-
 
 let bot: TelegramBot|null = null
 
@@ -190,6 +191,7 @@ const startTeleBot = async (BOT_TOKEN: string) => {
 
 	bot.on('message', message => {
 		logger(Colors.blue(`bot.on('channel_post'`))
+		logger(inspect(message, false, 3, true))
 		const chatId = message?.chat?.id
 		if (chatId) {
 			if (bot) {
@@ -198,7 +200,8 @@ const startTeleBot = async (BOT_TOKEN: string) => {
 			
 		}
 	})
-
+	//		'@conettest'
+	//	bot.sendMessage('@conettest', 'hello')
 }
 
 const start = async () => {
