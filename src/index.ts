@@ -191,14 +191,14 @@ const startTeleBot = async (BOT_TOKEN: string) => {
 
 	bot.on('message', message => {
 		logger(Colors.blue(`bot.on('channel_post'`))
-		logger(inspect(message, false, 3, true))
 		const chatId = message?.chat?.id
-		if (chatId) {
-			if (bot) {
-				return bot.sendMessage(chatId, `Your ID is ${chatId}`)
-			}
+		const msg = chatId && message?.text && /^\/id$/.test(message?.text)? `Your ID is ${chatId}`: `/id to show your Telegram ID`
 			
+		
+		if (bot && chatId) {
+			return bot.sendMessage(chatId, msg)
 		}
+		
 	})
 	//		'@conettest'
 	//	bot.sendMessage('@conettest', 'hello')
