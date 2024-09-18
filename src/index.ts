@@ -192,10 +192,10 @@ const startTeleBot = async (BOT_TOKEN: string) => {
 	bot.on('message', message => {
 		logger(Colors.blue(`bot.on('channel_post'`))
 		const chatId = message?.chat?.id
-		const msg = chatId && message?.text && /^\/id$/.test(message?.text)? `Your ID is ${chatId}`: `/id to show your Telegram ID`
+		const msg = chatId && message?.text && /^\/id$/.test(message?.text)? `Your ID is ${chatId}`: null
 			
 		
-		if (bot && chatId) {
+		if (bot && chatId && msg) {
 			return bot.sendMessage(chatId, msg)
 		}
 		
