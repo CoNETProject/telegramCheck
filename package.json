@@ -1,0 +1,74 @@
+{
+	"name": "@conet.project/twitter-api",
+	"version": "0.1.0",
+	"author": {
+		"name": "CONET Project",
+		"email": "info@conet.network"
+	},
+	"description": "A New Internet Zero Censorship, Complete Privacy",
+	"license": "MIT",
+	"files": [
+		"./dist/**/*.*"
+	],
+	"bugs": {
+		"url": "https://github.com/CoNET-project/CoNET-DL/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CoNET-project/CoNET-DL.git"
+	},
+	"homepage": "https://CoNETTech.ca",
+	"main": "./src/electron/electron.js",
+	"scripts": {
+		"build": "tsc --project tsconfig.json"
+	},
+	"bin": {
+		"conet-mvp-dl": "dist/cli.js"
+	},
+	"eslintConfig": {
+		"overrides": [
+			{
+				"files": [
+					"**/*.stories.*"
+				],
+				"rules": {
+					"import/no-anonymous-default-export": "off"
+				}
+			}
+		]
+	},
+	"keywords": [
+		"CONET",
+		"CONET-DL",
+		"nodejs",
+		"typescript",
+		"socks"
+	],
+	"dependencies": {
+		"async": "3.2.5",
+		"colors": "1.4.0",
+		"compression": "^1.7.4",
+		"cors": "^2.8.5",
+		"ethers": "^6.13.2",
+		"global-dirs": "^4.0.0",
+		"hexdump-nodejs": "^0.1.0",
+		"ip": "^2.0.1",
+		"jsbi": "^4.3.0",
+		"moment": "^2.30.1",
+		"openpgp": "^5.11.2",
+		"phin": "^3.7.1",
+		"puppeteer": "^23.3.0",
+		"telegraf": "^4.16.3",
+		"node-telegram-bot-api": "^0.66.0",
+		"uuid": "^10.0.0"
+	},
+	"devDependencies": {
+		"@openpgp/web-stream-tools": "^0.1.1",
+		"@types/async": "^3.2.24",
+		"@types/compression": "^1.7.5",
+		"@types/ip": "^1.1.3",
+		"@types/openpgp": "^4.4.22",
+		"@types/uuid": "^9.0.8",
+		"@types/node-telegram-bot-api": "^0.64.7"
+	}
+}
