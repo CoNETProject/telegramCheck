@@ -190,12 +190,13 @@ const searchAccount = async () => {
 		}
 		await callbackTwitter(task)
 		pageLocked = false
-		return searchAccount()
+		searchAccount()
+		return 
 	}
 	task.result = await _searchAccount(telegramAccount)
 	await callbackTwitter(task)
 	pageLocked = false
-	return searchAccount()
+	searchAccount()
 }
 
 let bot: TelegramBot|null = null
