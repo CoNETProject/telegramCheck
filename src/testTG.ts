@@ -8,7 +8,7 @@ const start = async () => {
     
 	const acc = ethers.Wallet.createRandom()
 	const url = 'https://apiv3.conet.network/api/tg-check-follow'
-	const checkTwitterAccount = '7333800643'
+	const checkTwitterAccount = 'werfewrf'
 	const messageObj: minerObj = {
 		walletAddress: acc.address.toLowerCase(),
 		data: [checkTwitterAccount]

@@ -186,7 +186,7 @@ const searchAccount = async () => {
 		task.result = {
 			status: 404,
 			message: `Invalid Telegram User ID`,
-			userID: telegramAccount
+			userID: task.checkAccount
 		}
 		await callbackTwitter(task)
 		pageLocked = false

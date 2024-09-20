@@ -149,7 +149,7 @@ interface result {
 	status: number,
 	isInTGGroup?: boolean
 	message?: string
-	userID?: number
+	userID?: number|string
 }
 
 interface taskPoolObj {
