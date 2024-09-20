@@ -3,6 +3,7 @@ import { logger } from './logger'
 import Colors from 'colors/safe'
 import {readFileSync} from 'node:fs'
 import {join} from 'node:path'
+import {IncomingMessage} from 'node:http'
 import {ethers, Wallet} from 'ethers'
 import {inspect} from 'node:util'
 import {request as requestHttps, RequestOptions} from 'node:https'
@@ -16,7 +17,7 @@ const chatId = '@conettest'			//'-2357293635'
 
 const startGossip = (url: string, POST: string, callback: (err?: string, data?: string) => void) => {
 	const Url = new URL(url)
-
+	let res: IncomingMessage|null = null
 	const option: RequestOptions = {
 		hostname: Url.hostname,
 		port: 443,
@@ -53,6 +54,7 @@ const startGossip = (url: string, POST: string, callback: (err?: string, data?: 
 				if (first) {
 					first = false
 				}
+				
 				callback ('', data)
 				data = ''
 				
@@ -60,27 +62,26 @@ const startGossip = (url: string, POST: string, callback: (err?: string, data?: 
 		})
 
 		res.once('error', err => {
-			kkk.destroy()
+			
 			logger(Colors.red(`startGossip [${url}] res on ERROR! Try to restart! `), err.message)
-			return startGossip (url, POST, callback)
+			startGossip(url, POST,callback )
 		})
 
 		res.once('end', () => {
-			kkk.destroy()
-			logger(Colors.red(`startGossip [${url}] res on END! Try to restart! `))
-			return startGossip (url, POST, callback)
+			res.destroy()
+			logger(Colors.red(`res on end! destroy res!`))
+
 		})
 		
 	})
 
-	// kkk.on('error', err => {
-	// 	kkk.destroy()
-	// 	logger(Colors.red(`startGossip [${url}] requestHttps on Error! Try to restart! `), err.message)
-	// 	return startGossip (url, POST, callback)
-	// })
 
 	kkk.end(POST)
 
+	kkk.once ('error', err => {
+		logger(`startGossip requestHttps on Error! restart again! ${err.message}`)
+		return startGossip (url, POST, callback)
+	})
 }
 
 const listenAPIServer = async () => {
@@ -115,7 +116,8 @@ const listenAPIServer = async () => {
 				postPool.push(taskPoolObj)
 				
 			} catch (ex) {
-				return logger(Colors.magenta(`startGossip got format error data from API`))
+				logger(inspect(data, false, 3, true))
+				return logger(Colors.magenta(`startGossip got JSON error data from API `))
 			}
 
 			return searchAccount()
@@ -142,45 +144,58 @@ const callbackTwitter = async (obj: taskPoolObj) => {
 	logger(req.body.toJSON())
 }
 
-const searchAccount = async () => {
+const _searchAccount: (telegramAccount: number) => Promise<result> = (telegramAccount: number) => new Promise(resolve => {
+	
+
 	if (!bot) {
-		return 
+		const result: result = {
+			status: 501,
+			message: 'CONET Telegram account check Bot has issue',
+			isInTGGroup: false
+		}
+		return resolve(result)
 	}
 
+	const result: result = {
+		status: 200,
+		isInTGGroup: false,
+		userID: telegramAccount
+	}
+
+	bot.getChatMember(chatId, telegramAccount).then(async () => {
+		result.isInTGGroup = true
+		return resolve(result)
+
+	}).catch(async ex => {
+		return resolve(result)
+	})
+})
+
+const searchAccount = async () => {
+
+	
 	const task = postPool.shift()
 	if (!task) {
-		logger(Colors.gray(`postPool has empty!`))
-		return
+		return logger(Colors.gray(`postPool has empty!`))
+		
 	}
 	pageLocked = true
 	const telegramAccount = parseInt(task.checkAccount)
 
 	if ( isNaN(telegramAccount )) {
-		
-		task.result.status = 404
+		task.result = {
+			status: 404,
+			message: `Invalid Telegram User ID`,
+			userID: telegramAccount
+		}
 		await callbackTwitter(task)
 		pageLocked = false
-		searchAccount()
-		return 
+		return searchAccount()
 	}
-
-	
-
-	bot.getChatMember(chatId, telegramAccount).then(async () => {
-		logger(Colors.blue(`search Telegram Account ${telegramAccount} is in group!`))
-		task.result.isInTGGroup = true
-		await callbackTwitter(task)
-		pageLocked = false
-		searchAccount()
-		return 
-
-	}).catch(async ex => {
-		task.result.isInTGGroup = false
-		logger(Colors.red(`getChatMember has EX ${ex.message}`))
-		await callbackTwitter(task)
-		pageLocked = false
-		searchAccount()
-	})
+	task.result = await _searchAccount(telegramAccount)
+	await callbackTwitter(task)
+	pageLocked = false
+	return searchAccount()
 }
 
 let bot: TelegramBot|null = null
@@ -213,7 +228,7 @@ const start = async () => {
 	wallet = new ethers.Wallet(account.postAccount)
 	startTeleBot(account.account)
 	listenAPIServer()
-	
+
 }
 
 start()

@@ -145,13 +145,17 @@ interface account {
 	postAccount: string
 }
 
+interface result {
+	status: number,
+	isInTGGroup?: boolean
+	message?: string
+	userID?: number
+}
+
 interface taskPoolObj {
 	checkAccount: string
 	uuid: string
-	result: {
-		status: number,
-		isInTGGroup?: boolean
-	}
+	result: result
 	walletAddress: string
 }
 interface minerObj {
