@@ -135,13 +135,19 @@ const callbackTwitter = async (obj: taskPoolObj) => {
 	const message = JSON.stringify({walletAddress: wallet.address.toLowerCase(), data:obj })
 	const signMessage = await wallet.signMessage(message)
 	const data = {message, signMessage}
-	const req = await Phin({
+	
+	Phin({
 		url,
 		method: 'POST',
 		data
+	}).then (req => {
+		
+	})
+	.catch(ex => {
+
 	})
 
-	logger(req.body.toJSON())
+	
 }
 
 const _searchAccount: (telegramAccount: number) => Promise<result> = (telegramAccount: number) => new Promise(resolve => {
